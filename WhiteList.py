@@ -2,8 +2,8 @@ import tkinter as tk
 import subprocess
 import os
 from tkinter import ttk
-from DesktopCleaner import elements
 from math import ceil
+from DesktopCleaner import elements
 
 APP_DATA_PATH = (subprocess.run("echo %APPDATA%", shell = True, text = True, capture_output = True).stdout)[:-1]
 
@@ -14,6 +14,7 @@ class App(tk.Tk):
         WhiteList(self)        
             
     def display_elements(self):
+        print("display elements")
         check_frame = ttk.Frame(self)
         check_frame.columnconfigure((0,1,2), weight = 1)
         check_frame.rowconfigure(tuple(range(ceil(len(elements) / 3))), weight = 1)
@@ -27,6 +28,7 @@ class App(tk.Tk):
                 CheckButton(check_frame, element, row, column)                
                 column += 1
         check_frame.pack()
+
 
 class WhiteList(ttk.Frame):  
     def __init__(self, parent):
@@ -57,7 +59,7 @@ class WhiteList(ttk.Frame):
     
     def create_file(self):
         subprocess.run(f"%SystemRoot%\system32\WindowsPowerShell\v1.0\powershell.exe echo> {APP_DATA_PATH}\WhiteList.txt", shell = True)
-        self.file_frame.pack_forget()
+        for widget in self.file_frame.winfo_children(): widget.destroy()
         self.widgets_for_an_existing_whitelist()
     
     def existing_file_names() ->list:
@@ -80,10 +82,9 @@ class WhiteList(ttk.Frame):
     
       
 class CheckButton(ttk.Checkbutton):
-    global white_list
-    white_list = WhiteList.existing_file_names()
     def __init__(self, parent, element, row, column):
         super().__init__(parent)    
+        self.white_list = WhiteList.existing_file_names()
         self.row = row
         self.column = column
         self.element = element
@@ -99,7 +100,7 @@ class CheckButton(ttk.Checkbutton):
         self.check.grid(row = self.row, column = self.column, sticky = 'w')
     
     def state(self):
-        if self.element in white_list: 
+        if self.element in self.white_list: 
             return True
         return False
         
