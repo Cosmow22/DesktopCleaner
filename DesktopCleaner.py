@@ -20,11 +20,11 @@ def DeleteFolder(Folder) -> None:
         print(f"Erreur lors de la suppression de {Folder}: {error}")
 
 
-desktop_path = run(
+DESKTOP_PATH = run(
     "echo %USERPROFILE%\Desktop", shell=True, capture_output=True, text=True
-)
+).stdout[:-1]
 os.chdir(
-    desktop_path.stdout[:-1]
+    DESKTOP_PATH
 )  # on se place dans le bureau en retirant le \n qui est ajouté par echo
 elements = [element for element in os.listdir()]
 
