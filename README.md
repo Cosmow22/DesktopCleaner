@@ -13,9 +13,8 @@ Il est conseillé de placer ses deux programmes dans le bureau, c'est plus prati
 ## Le dossier appdata
 
 Pour y accéder et voir le fichier WhiteList.txt, il faut se rendre à cette adresse :
-`
-C:\Users\Utilisateur\AppData\Roaming
-`
+
+`C:\Users\Utilisateur\AppData\Roaming`
 Pour ce faire, vous pouvez :
 
 1. rentrer cette commande dans l'invite de commande : `cd %appdata%`
