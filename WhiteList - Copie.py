@@ -10,7 +10,7 @@ APP_DATA_PATH = (
 )[:-1]
 
 
-def is_script_name(element: str) -> bool:
+def is_script_name(element: str) -> None:
     if os.path.splitext(element)[0] in ("DesktopCleaner", "WhiteList"):
         return True
     else:
@@ -29,14 +29,11 @@ def run_desktop_cleaner(root) -> None:
     run("python DesktopCleaner.py")
 
 
-# region App
 class App(tkinter.Tk):
     def __init__(self, elements, connected, white_list):
         super().__init__()
         self.elements = elements
         self.resizable(False, False)
-        self.attributes("-topmost", True)
-        self.title("WhiteList")
         WhiteList(self)
         if connected:
             ttk.Label(
@@ -61,34 +58,44 @@ class App(tkinter.Tk):
         list_length_elements = list(map(len, elements_copy))
         median = ceil(len(list_length_elements) / 2)
         max_char_for_element = list_length_elements[median]
+        n_column = len(elements_copy) // 5
 
         check_frame = ttk.Frame(self)
         check_frame.pack(expand=True, fill="both", padx=10, pady=5)
+        check_frame.columnconfigure((0, 1, 2), weight=1, uniform="a")
+        check_frame.rowconfigure(tuple(range(3)), weight=1)
+        row, column = 0, 0
         for element in self.elements:
             if is_script_name(element):
                 self.elements.remove(element)
                 self.elements.append(element)
-
-        n_column = 3
-        row, column = 0, 0
         for element in self.elements:
-            CheckButton(
-                check_frame,
-                element,
-                row,
-                column,
-                self.white_list,
-                max_char_for_element,
-                self.full_name_element,
-            )
+            # print(f'element : {element}; row : {row}; column : {column}; n_element : {self.elements.index(element) + 1}')
             if (self.elements.index(element) + 1) % n_column == 0:
+                CheckButton(
+                    check_frame,
+                    element,
+                    row,
+                    column,
+                    self.white_list,
+                    max_char_for_element,
+                    self.full_name_element,
+                )
                 column = 0
                 row += 1
             else:
+                CheckButton(
+                    check_frame,
+                    element,
+                    row,
+                    column,
+                    self.white_list,
+                    max_char_for_element,
+                    self.full_name_element,
+                )
                 column += 1
 
 
-# region WhiteList
 class WhiteList(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -154,37 +161,31 @@ class WhiteList(ttk.Frame):
                     file.write(f"{line}")
 
 
-# region CheckButton
 class CheckButton(ttk.Checkbutton):
-    def __init__(
-        self, parent, 
-        element: str, 
-        row: int, 
-        column: int, 
-        white_list, 
-        max_char, 
-        tkinter_var
-    ):
+    def __init__(self, parent, element, row, column, white_list, max_char, tkinter_var):
         super().__init__(parent)
         self.white_list = white_list
+        self.row = row
+        self.column = column
         self.element = element
         self.tkinter_var = tkinter_var
         self.max_char = max_char
-        self.checked = tkinter.BooleanVar(value=self.state())
+        self.state = tkinter.BooleanVar(value=self.state())
+        # print(f'{element} → {element[:max_char]} (len : {len(element)})')
         self.check = ttk.Checkbutton(
             master=parent,
             text=self.element[:max_char],
-            variable=self.checked,
+            variable=self.state,
             onvalue=True,
             offvalue=False,
             state=("disabled" if is_script_name(element) else "normal"),
             command=lambda: (
                 WhiteList.write(self.element)
-                if self.checked.get() == True
+                if self.state.get() == True
                 else WhiteList.unwrite(self.element)
             ),
         )
-        self.check.grid(row=row, column=column, sticky="w")
+        self.check.grid(row=self.row, column=self.column, sticky="w")
         self.check.bind("<Double-Button-3>", lambda event: open_element(self.element))
         self.check.bind("<Enter>", self.show_full_name)
 
@@ -194,6 +195,7 @@ class CheckButton(ttk.Checkbutton):
         return False
 
     def show_full_name(self, event) -> None:
+        print(self.max_char, self.element, len(self.element))
         if self.max_char < len(self.element):
             self.tkinter_var.set(self.element)
 
