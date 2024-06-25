@@ -26,8 +26,9 @@ def open_element(element: str) -> None:
 
 def run_desktop_cleaner(root) -> None:
     root.destroy()
-    run("python DesktopCleaner.py")
-
+    with open("DesktopCleaner.py") as fp:
+        desktop_cleaner_file_content = fp.read()
+    exec(desktop_cleaner_file_content)
 
 # region App
 class App(tkinter.Tk):
